@@ -1,0 +1,45 @@
+# ProAR inference dependencies
+#
+# Install the following CUDA-specific packages BEFORE this file:
+#   pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+#   pip install torch_scatter -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+#   pip install openmm[cuda12]
+# See README.md for details.
+
+# Core
+pytorch_lightning
+hydra-core
+omegaconf
+
+# Protein structure
+biopython
+mdtraj
+fair-esm
+
+# Openfold dependencies
+ml-collections
+dm-tree
+modelcif
+scipy
+
+# Graph neural networks
+torch_geometric
+
+# Utilities
+tqdm
+rich
+requests
+huggingface_hub
+tensordict
+numpy
+pandas
+einops
+scikit-learn
+tmtools
+xarray
+xskillscore
+torchmetrics
+
+# Amber relaxation
+pdbfixer
+absl-py

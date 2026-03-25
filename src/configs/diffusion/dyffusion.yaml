@@ -1,0 +1,38 @@
+# @package _global_
+defaults:
+  - _base.yaml
+  - _self_
+
+diffusion:
+  _target_: src.diffusion.proar.ProAR
+
+  # Interpolator checkpoint loading (provide local path)
+  interpolator: null
+  interpolator_local_checkpoint_path: null
+  hydra_local_config_path: null
+
+  # How to condition the forecaster network. Options: "none", "data", "data+noise"
+  forward_conditioning: "data"
+
+  # Using auxiliary diffusion steps (k>0 in the paper)
+  schedule: 'before_t1_only'
+  additional_interpolation_steps: 0
+  additional_interpolation_steps_factor: 0
+  interpolate_before_t1: True
+
+  # Time encoding for the forecaster network
+  time_encoding: "dynamics"
+
+  # Stochastic dropout in the interpolator for ensemble diversity
+  enable_interpolator_dropout: True
+
+  # ---- Sampling parameters:
+  # Sampling algorithm. Options: 'cold', 'naive'
+  sampling_type: 'cold'
+  sampling_schedule: null
+
+  # Whether to refine intermediate predictions by re-running the interpolator
+  refine_intermediate_predictions: False
+
+  timesteps: ${datamodule.horizon}
+  log_every_t: True

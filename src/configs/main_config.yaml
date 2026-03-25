@@ -1,0 +1,40 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - trainer: default.yaml
+  - model: p2dflow.yaml
+  - diffusion: null
+  - datamodule: atlas.yaml
+  - module: proar.yaml
+  - callbacks: default.yaml
+  - mode: default.yaml
+  - experiment: null
+
+work_dir: ./results
+
+# path to checkpoints
+ckpt_dir: ${work_dir}/checkpoints/
+
+# path for logging
+log_dir: ${work_dir}/logs/
+
+# pretty print config at the start of the run using Rich library
+print_config: True
+
+ignore_warnings: True
+
+# Checkpoint path to load for inference (local path)
+ckpt_path: null
+
+verbose: True
+
+# Global seed for reproducibility
+seed: 11
+
+torch_matmul_precision: "high"
+
+# name of the run
+name: null
+name_suffix: null
+suffix: null

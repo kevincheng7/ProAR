@@ -1,0 +1,50 @@
+# @package _global_
+
+defaults:
+  - _base_model_config.yaml   # general, model independent, parameters
+  - _self_
+
+model:
+  _target_: src.models.p2dflow.ModifiedP2DFlowForecast
+  model_conf:
+    dropout: 0.2
+    node_embed_size: 256
+    edge_embed_size: 128
+    num_blocks: 6
+    node_features:
+      c_s: ${model.model_conf.node_embed_size}
+      c_pos_emb: 1280
+      c_timestep_emb: ${model.model_conf.node_embed_size}
+      dropout: ${model.model_conf.dropout}
+    edge_features:
+      c_s: ${model.model_conf.node_embed_size}
+      c_p: ${model.model_conf.edge_embed_size}
+      feat_dim: ${model.model_conf.edge_embed_size}
+      num_bins: 64
+      max_dist: 30.0
+      dropout: ${model.model_conf.dropout}
+    ipa:
+      c_s: ${model.model_conf.node_embed_size}
+      c_z: ${model.model_conf.edge_embed_size}
+      c_hidden: ${model.model_conf.edge_embed_size}
+      no_heads: 16
+      no_qk_points: 32
+      no_v_points: 8
+
+  deterministic: True
+  loss_function: "p2dflow_forecast"
+  loss_config:
+    # deterministic prediction loss functions
+    violation:
+      weight: 1.0
+    # fape:
+    #   weight: 5.0
+    neighbor_ca_dist:
+      weight: 1.0
+    pairwise_dist:
+      weight: 5.0
+    protein_mse:
+      weight: 5.0
+
+trainer:
+  deterministic: False

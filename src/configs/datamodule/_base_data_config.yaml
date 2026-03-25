@@ -1,0 +1,12 @@
+# Base data configuration for ProAR inference
+data_dir: "${oc.env:HOME}/data"
+
+eval_batch_size: 1
+num_workers: 0
+pin_memory: True
+persistent_workers: False
+drop_last: False
+verbose: ${verbose}
+
+window: 1
+horizon: 1

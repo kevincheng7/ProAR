@@ -1,0 +1,24 @@
+# Atlas protein dataset configuration (inference only)
+#
+# Expected data directory structure:
+#   data_dir/
+#     protein_A/
+#       init.pdb            # Initial frame PDB file
+#       esm_seq.npy         # (num_res, 1280) ESM sequence representation
+#       esm_pair.npy        # (num_res, num_res, 20) ESM pair representation
+#     protein_B/
+#       ...
+
+defaults:
+  - _base_data_config.yaml
+  - _self_
+
+_target_: src.datamodules.molecular_dynamics_simulation.MolecularDynamicsSimulationDataModule
+
+data_dir: ???  # REQUIRED: set to the path of your data directory
+
+eval_batch_size: 1
+num_workers: 0
+max_squared_len: 640000  # 800^2, controls max protein size for GPU memory
+
+prediction_horizon: null  # if null, computed from horizon * (autoregressive_steps + 1)

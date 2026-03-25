@@ -1,0 +1,13 @@
+# @package _global_
+
+module:
+  monitor: null
+  mode: "min"
+  use_ema: False
+  ema_decay: 0.9999
+  enable_inference_dropout: null
+  num_predictions: 20
+  prediction_inputs_noise: 0.0
+  logging_infix: ""
+  verbose: ${verbose}
+  seed: ${seed}

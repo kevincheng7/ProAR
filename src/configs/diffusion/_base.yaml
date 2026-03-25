@@ -1,0 +1,12 @@
+# @package _global_
+
+# Base diffusion config
+
+defaults:
+  # - /model/_base_model_config.yaml
+  - _self_
+
+diffusion:
+  timesteps: 1000
+  sampling_timesteps: null   # null means use all timesteps
+  loss_function: "l1"

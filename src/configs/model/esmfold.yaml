@@ -1,0 +1,53 @@
+# @package _global_
+
+defaults:
+  - _base_model_config.yaml   # general, model independent, parameters
+  - _self_
+
+model:
+  _target_: src.models.esmfold.ModifiedESMFoldInterpolation
+  loss_function: "alphafold_ipol"
+  loss_config:
+    # deterministic prediction loss functions
+    violation:
+      weight: 10.0
+    fape:
+      weight: 5.0
+    # protein_ca_mse:
+    #   weight: 2.0
+    # protein_mse:
+    #   weight: 2.0
+    smooth_lddt:
+      weight: 1.0
+    neighbor_ca_dist:
+      weight: 1.0
+    # rotation_mse:
+    #   weight: 1.0
+    pairwise_dist:
+      weight: 5.0
+    # bb_update:
+    #   weight: 0.1
+    # uncertainty prediction loss functions
+    mle:
+      weight: 0.01
+    variance_penalty:
+      weight: 1.0
+    violation_uncrty:
+      weight: 5.0
+    fape_uncrty:
+      weight: 5.0
+    # protein_heavy_mse_uncrty:
+    #   weight: 2.0
+    smooth_lddt_uncrty:
+      weight: 10.0
+    neighbor_ca_dist_uncrty:
+      weight: 1.0
+    # rotation_mse_uncrty:
+    #   weight: 1.0
+    pairwise_dist_uncrty:
+      weight: 10.0
+    bb_update_uncrty:
+      weight: 0.1
+
+trainer:
+  deterministic: False

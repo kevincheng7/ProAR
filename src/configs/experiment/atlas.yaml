@@ -1,0 +1,28 @@
+# @package _global_
+
+defaults:
+  - override /mode: exp.yaml
+  - override /trainer: ddp.yaml
+  - override /datamodule: atlas.yaml
+  - override /module: proar.yaml
+  - override /model: p2dflow.yaml
+  - override /diffusion: dyffusion.yaml
+  - override /callbacks: default.yaml
+  - _self_
+
+name: "forecast_${datamodule.horizon}h_atlas"
+
+datamodule:
+  horizon: 6
+
+trainer:
+  strategy: "ddp_find_unused_parameters_true"
+  precision: "16-mixed"
+  deterministic: False
+
+diffusion:
+  _target_: src.diffusion.proar.ProAR
+  refine_intermediate_predictions: True
+  loss_function: ${model.loss_function}
+  loss_config: ${model.loss_config}
+  deterministic: ${model.deterministic}

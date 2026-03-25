@@ -1,0 +1,48 @@
+# Project specific
+results/
+*.ckpt
+.vscode
+scripts/*.out
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# IDE
+.idea/
+.idea/**
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+outputs/**
+
+# Ruff / mypy
+.ruff_cache/
+.mypy_cache/
+
+# macOS
+.DS_Store
+**/.DS_Store

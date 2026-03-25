@@ -1,0 +1,7 @@
+defaults:
+  - _base_multi_horizon_config.yaml
+  - _self_
+
+_target_: src.experiment_types.forecasting.ProARForecasting
+save_dir: ${work_dir}/pdb/forecast/${now:%Y-%m-%d}
+num_predictions: 1
