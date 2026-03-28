@@ -41,8 +41,8 @@ Our experiments were conducted with **PyTorch 2.6.0 + CUDA 12.4**. We recommend 
 # 1. Install PyTorch with CUDA support
 pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
 
-# 2. Install torch_scatter (should match your PyTorch + CUDA version)
-pip install torch_scatter -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+# 2. Install PyG extensions (must match your PyTorch + CUDA version)
+pip install torch_scatter torch-cluster -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
 
 # 3. Install OpenMM with CUDA support
 pip install openmm[cuda12]

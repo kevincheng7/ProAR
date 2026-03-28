@@ -48,8 +48,9 @@ def nonensembled_transform_fns():
             data_transforms.get_chi_angles,
         ]
     )
-    crop_feats = dict(getattr(config, "data.common.feat"))
-    transforms.append(data_transforms.select_feat(list(crop_feats)))  # type: ignore
+    crop_feats = list(getattr(config, "data.common.feat"))
+    crop_feats += ["protein_aatype", "dssp"]
+    transforms.append(data_transforms.select_feat(crop_feats))  # type: ignore
     return transforms
 
 

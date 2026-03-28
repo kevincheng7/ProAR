@@ -2,7 +2,7 @@
 #
 # Install the following CUDA-specific packages BEFORE this file:
 #   pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
-#   pip install torch_scatter -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+#   pip install torch_scatter torch-cluster -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
 #   pip install openmm[cuda12]
 # See README.md for details.
 

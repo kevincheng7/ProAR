@@ -1,4 +1,5 @@
 import os
+import time as time_module
 from typing import Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -67,6 +68,7 @@ class ProAR(BaseDYffusion):
 
         self._relax_config = config.relax
         self._amber_relaxer = None
+        self._last_timing = {"network_s": 0.0, "relax_s": 0.0}
 
     @property
     def amber_relaxer(self):
@@ -288,6 +290,11 @@ class ProAR(BaseDYffusion):
             self.sampling_schedule,
             self.sampling_schedule[1:] + [last_i_n_plus_one],
         )
+
+        _relax_time = 0.0
+        torch.cuda.synchronize() if self.device.type == "cuda" else None
+        _t_start = time_module.perf_counter()
+
         for s, s_next in tqdm(
             s_and_snext, desc="Sampling time step", total=len(self.sampling_schedule), leave=False
         ):
@@ -328,7 +335,10 @@ class ProAR(BaseDYffusion):
                 x_interpolated = self.q_sample(**q_sample_kwargs, t=step_s_next, **sc_kw)
                 x_interpolated_s_next.update(x_interpolated)
             else:
+                torch.cuda.synchronize() if self.device.type == "cuda" else None
+                _t_relax_start = time_module.perf_counter()
                 x0_hat = self.relax(x0_hat)
+                _relax_time += time_module.perf_counter() - _t_relax_start
                 x_interpolated_s_next = x0_hat
 
             if getattr(self.hparams, "sampling_type") in ["cold"]:
@@ -378,6 +388,13 @@ class ProAR(BaseDYffusion):
                     **q_sample_kwargs, t=None, interpolation_time=i_n_time_tensor, **sc_kw
                 )
                 intermediates[f"t{i_n_for_str}_preds"].update(x_interpolated)
+
+        torch.cuda.synchronize() if self.device.type == "cuda" else None
+        _t_total = time_module.perf_counter() - _t_start
+        self._last_timing = {
+            "network_s": _t_total - _relax_time,
+            "relax_s": _relax_time,
+        }
 
         if last_i_n_plus_one < self.num_timesteps:
             return x_s, intermediates, x_interpolated_s_next

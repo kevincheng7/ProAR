@@ -86,7 +86,7 @@ def get_checkpoint_from_path(
         config = OmegaConf.unsafe_merge(config, overrides)
 
         try:
-            model = reload_model_from_config_and_ckpt(config, model_checkpoint_path)["model"]
+            model = reload_model_from_config_and_ckpt(config, model_checkpoint_path, also_datamodule=False)["model"]
             log.info(f"Successfully loaded model checkpoint from local path {model_checkpoint_path}")
         except RuntimeError as e:
             raise RuntimeError(

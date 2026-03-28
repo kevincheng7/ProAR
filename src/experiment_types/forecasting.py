@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import os
 from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -320,6 +321,8 @@ class ProARForecasting(AbstractMultiHorizonForecastingExperiment):
         total_t = t0
         predicted_range_last = [0.0] + self.prediction_timesteps[:-1]
         ar_window_steps_t = self.horizon_range[-self.window :]
+        _cumulative_network_s = 0.0
+        _cumulative_relax_s = 0.0
         for ar_step in tqdm(
             range(n_outer_loops),
             desc="Autoregressive Step",
@@ -339,6 +342,10 @@ class ProARForecasting(AbstractMultiHorizonForecastingExperiment):
                 results = self.get_preds_at_t_for_batch(
                     batch, t_step, split, autoregressive_inputs, ensemble=True, **pr_kwargs
                 )
+                if t_step == self.prediction_timesteps[0]:
+                    timing = self.model._last_timing
+                    _cumulative_network_s += timing["network_s"]
+                    _cumulative_relax_s += timing["relax_s"]
                 total_t += dt * (t_step - t_step_last)
                 total_horizon = ar_step * self.true_horizon + t_step
 
@@ -407,9 +414,6 @@ class ProARForecasting(AbstractMultiHorizonForecastingExperiment):
                         autoregressive_inputs[k] = torch.stack(
                             [ar_window_step[k] for ar_window_step in ar_window_steps], dim=1
                         )
-                # Only ESM conditions need to be retained for the next AR step;
-                # structural features come from autoregressive_inputs.
-                batch = {k: v for k, v in batch.items() if k in ["esm", "esm_pair"]}
         if compute_metrics:
             assert avg_metric_trackers is not None and avg_metric_keys is not None
             log_kwargs = dict()
@@ -418,4 +422,45 @@ class ProARForecasting(AbstractMultiHorizonForecastingExperiment):
                 log_dict[key] = tracker
             self.log_dict(log_dict, on_step=False, on_epoch=True, **log_kwargs)
 
+        return_dict["_timing"] = {
+            "protein_name": meta_data[self.window - 1]["system"][0],
+            "network_s": _cumulative_network_s,
+            "relax_s": _cumulative_relax_s,
+        }
+
         return return_dict
+
+    def on_test_epoch_end(self, **kwargs) -> None:
+        timing_rows = []
+        for split, outputs in self._test_step_outputs.items():
+            for out in outputs:
+                if "_timing" in out:
+                    t = out.pop("_timing")
+                    timing_rows.append(t)
+
+        super().on_test_epoch_end(**kwargs)
+
+        if not timing_rows:
+            return
+
+        save_dir = getattr(self.hparams, "save_dir", None)
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+            csv_path = os.path.join(save_dir, "timing.csv")
+            with open(csv_path, "w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=["protein_name", "network_s", "relax_s", "total_s"])
+                writer.writeheader()
+                for row in timing_rows:
+                    row["total_s"] = row["network_s"] + row["relax_s"]
+                    writer.writerow({k: f"{v:.3f}" if isinstance(v, float) else v for k, v in row.items()})
+
+            total_network = sum(r["network_s"] for r in timing_rows)
+            total_relax = sum(r["relax_s"] for r in timing_rows)
+            total_all = sum(r["total_s"] for r in timing_rows)
+            n = len(timing_rows)
+            self.log_text.info(
+                f"Timing summary ({n} proteins) → {csv_path}\n"
+                f"  Network: {total_network:.1f}s total, {total_network / n:.2f}s avg\n"
+                f"  Relax:   {total_relax:.1f}s total, {total_relax / n:.2f}s avg\n"
+                f"  Total:   {total_all:.1f}s total, {total_all / n:.2f}s avg"
+            )
